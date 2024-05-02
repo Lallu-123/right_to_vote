@@ -1,0 +1,55 @@
+package com.right_to_vote;
+
+import java.util.ArrayList;
+import java.util.List;
+
+
+
+public class Main {
+    public static void main(String[] args) {
+        List<Instrument> instruments = new ArrayList<>();
+        instruments.add(new Instrument(3, 2, 10));
+        instruments.add(new Instrument(4, 3, 15));
+        instruments.add(new Instrument(2, 1, 8));
+        instruments.add(new Instrument(5, 4, 20));
+
+        int capacityWeight = 10;
+        int capacityVolume = 7;
+
+        int[][][] dp = new int[capacityWeight + 1][capacityVolume + 1][instruments.size() + 1];
+
+        for (int i = 1; i <= instruments.size(); i++) {
+            Instrument instrument = instruments.get(i - 1);
+            for (int w = 0; w <= capacityWeight; w++) {
+                for (int v = 0; v <= capacityVolume; v++) {
+                    if (instrument.weight <= w && instrument.volume <= v) {
+                        dp[w][v][i] = Math.max(dp[w][v][i - 1], dp[w - instrument.weight][v - instrument.volume][i - 1] + instrument.value);
+                    } else {
+                        dp[w][v][i] = dp[w][v][i - 1];
+                    }
+                }
+            }
+        }
+
+        List<Instrument> selectedInstruments = new ArrayList<>();
+        int w = capacityWeight;
+        int v = capacityVolume;
+        for (int i = instruments.size(); i > 0; i--) {
+            if (dp[w][v][i] != dp[w][v][i - 1]) {
+                Instrument instrument = instruments.get(i - 1);
+                selectedInstruments.add(instrument);
+                w -= instrument.weight;
+                v -= instrument.volume;
+            }
+        }
+
+        System.out.println("Selected instruments:");
+        for (Instrument instrument : selectedInstruments) {
+            System.out.println("- Instrument weight: " + instrument.weight + " kg, volume: " + instrument.volume + " m^3, value: " + instrument.value);
+        }
+        System.out.println("Total weight: " + (capacityWeight - w) + " kg");
+        System.out.println("Total volume: " + (capacityVolume - v) + " m^3");
+        System.out.println("Total scientific value achieved: " + dp[capacityWeight][capacityVolume][instruments.size()]);
+    }
+}
+
